@@ -2,6 +2,7 @@ import ipaddress
 import os
 import re
 import socket
+from functools import lru_cache
 from pathlib import Path
 from urllib.parse import quote, urlsplit, urlunsplit
 
@@ -43,8 +44,10 @@ def _playwright_error_message(error: Exception) -> str:
     if "err_connection_timed_out" in message or "timeout" in message:
         return (
             "The website did not respond to the scanner before the timeout. It may be "
-            "slow, temporarily unavailable, blocking automated browsers, or unreachable "
-            "from this network. Try again or scan another public page."
+            "slow, temporarily unavailable, unreachable from this network, or may block "
+            "automated scanners or automated browsers. Bot protection and CAPTCHAs are "
+            "not bypassed. "
+            "Try again or scan another public page."
         )
     if "err_cert" in message or "certificate" in message:
         return (
@@ -72,12 +75,14 @@ def _playwright_error_message(error: Exception) -> str:
             "blocked address or stopped the automated request."
         )
     return (
-        "The browser could not load or scan this website. It may require a sign-in, "
-        "human verification, or browser access that this scanner cannot provide."
+        "The browser could not load or scan this website. The site may block automated "
+        "scanners or require a sign-in, CAPTCHA, or browser access this scanner cannot "
+        "provide. Bot protection is not bypassed."
     )
 
 
-def _validate_host(hostname: str, port: int) -> str:
+@lru_cache(maxsize=1024)
+def _validate_host(hostname: str) -> str:
     host = hostname.rstrip(".").lower()
     if not host or "%" in host or host.endswith(BLOCKED_SUFFIXES):
         raise URLValidationError("Use a public website address, not a local or internal host.")
@@ -111,7 +116,6 @@ def _validate_host(hostname: str, port: int) -> str:
     try:
         addresses = socket.getaddrinfo(
             ascii_host,
-            port,
             type=socket.SOCK_STREAM,
         )
     except socket.gaierror as error:
@@ -164,7 +168,7 @@ def validate_public_url(raw_url: str) -> str:
             "Only standard HTTP (port 80) and HTTPS (port 443) URLs are allowed."
         )
 
-    normalized_host = _validate_host(hostname, effective_port)
+    normalized_host = _validate_host(hostname.rstrip(".").lower())
     if ":" in normalized_host:
         normalized_host = f"[{normalized_host}]"
     netloc = normalized_host if port is None else f"{normalized_host}:{port}"
@@ -202,6 +206,26 @@ def _axe_violations(results: dict) -> list[dict]:
     return violations
 
 
+def _guard_browser_request(route):
+    target = route.request.url
+    scheme = target.partition(":")[0].lower()
+    if scheme in {"data", "blob", "about"}:
+        route.continue_()
+        return
+
+    if route.request.resource_type in {"image", "media", "font"}:
+        route.abort()
+        return
+
+    try:
+        validate_public_url(target)
+    except URLValidationError:
+        app.logger.warning("Blocked a non-public browser request during accessibility scan.")
+        route.abort()
+        return
+    route.continue_()
+
+
 def scan_website(url: str) -> dict:
     if not AXE_SCRIPT.is_file():
         raise ScanError(
@@ -219,16 +243,6 @@ def scan_website(url: str) -> dict:
     from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
     from playwright.sync_api import sync_playwright
 
-    def guard_request(route):
-        target = route.request.url
-        try:
-            validate_public_url(target)
-        except URLValidationError:
-            app.logger.warning("Blocked a non-public browser request during accessibility scan.")
-            route.abort()
-            return
-        route.continue_()
-
     try:
         with sync_playwright() as playwright:
             if browserless_token:
@@ -244,32 +258,49 @@ def scan_website(url: str) -> dict:
                         "`BROWSERLESS_TOKEN` value in the deployment settings."
                     ) from error
             else:
-                browser = playwright.chromium.launch(headless=True)
+                browser = playwright.chromium.launch(
+                    headless=True,
+                    args=[
+                        "--disable-dev-shm-usage",
+                        "--no-sandbox",
+                        "--disable-gpu",
+                    ],
+                )
             try:
                 context = browser.new_context(
                     accept_downloads=False,
                     ignore_https_errors=False,
+                    locale="en-US",
                     service_workers="block",
                 )
                 context.add_init_script(path=str(AXE_SCRIPT))
-                context.route("**/*", guard_request)
+                context.route("**/*", _guard_browser_request)
                 page = context.new_page()
-                page.set_default_navigation_timeout(25_000)
+                page.set_default_navigation_timeout(40_000)
                 page.set_default_timeout(20_000)
 
-                response = page.goto(url, wait_until="commit")
+                response = page.goto(
+                    url,
+                    wait_until="domcontentloaded",
+                    timeout=40_000,
+                )
                 if response is None:
                     raise ScanError("The website did not return a page that could be scanned.")
                 if response.status >= 400:
+                    if response.status in {401, 403, 429}:
+                        raise ScanError(
+                            f"The website returned HTTP {response.status} and likely blocks "
+                            "automated scanners or requires a sign-in. Bot protection and "
+                            "CAPTCHAs are not bypassed."
+                        )
                     raise ScanError(f"The website returned HTTP {response.status}.")
 
                 try:
-                    page.wait_for_load_state("domcontentloaded", timeout=10_000)
-                except PlaywrightTimeoutError as error:
-                    raise ScanError(
-                        "The website responded, but its page did not become ready to scan "
-                        "within 10 seconds. It may be slow or may block automated browsers."
-                    ) from error
+                    page.wait_for_load_state("load", timeout=8_000)
+                except PlaywrightTimeoutError:
+                    app.logger.info(
+                        "Page load state timed out; scanning the current document."
+                    )
 
                 page.evaluate("window.stop()")
 

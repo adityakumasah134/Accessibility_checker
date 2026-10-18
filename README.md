@@ -96,15 +96,15 @@ Then open **http://127.0.0.1:5000**.
 ## How the scan works
 
 1. The server validates the URL and resolves its hostname before scanning.
-2. Playwright loads the site in Chromium; browser requests, including redirects and subresources, are checked too.
+2. Playwright loads the site in Chromium; browser requests, including redirects and subresources, are checked too. Host validation results are cached so repeated requests to the same hostname do not repeat DNS lookups. Browser-local `data:`, `blob:`, and `about:` resources are allowed, while images, media, and fonts are skipped to reduce load time.
 3. The locally installed axe-core script runs against the rendered page.
 4. The browser returns axe-core's violations, passing checks, and incomplete checks to the dashboard.
 
-The browser waits for the document to become ready, stops waiting for background page loads, and then runs axe-core. This keeps busy pages from holding the scan open unnecessarily; sites that do not become ready within the scan timeout may still be unavailable to the automated browser. Playwright loads the local axe-core script at document initialization, so pages with restrictive script-tag policies can still be inspected without adding a remote script to the site. If navigation fails, the dashboard reports likely causes such as a timeout, DNS issue, certificate problem, or refused connection.
+Navigation waits up to 40 seconds for the document to reach `DOMContentLoaded`. The scanner then allows up to 8 more seconds for the full `load` state; if background resources keep loading, it scans the DOM already available instead of failing solely because the page did not fully load. The dashboard displays “Scanning, this can take up to a minute” while the request is running. Playwright loads the local axe-core script at document initialization, so pages with restrictive script-tag policies can still be inspected without adding a remote script to the site. If navigation fails, the dashboard reports likely causes such as a timeout, DNS issue, certificate problem, or refused connection.
 
 The page's violation descriptions, affected selectors, HTML snippets, help links, and remediation messages come from axe-core's scan output. Automated checks cannot identify every accessibility barrier; keyboard, screen-reader, and user testing remain important.
 
-Some public websites cannot be scanned automatically. They may block headless browsers, require a login or CAPTCHA, depend on browser features unavailable to this scanner, or be unreachable due to network, firewall, DNS, or certificate problems. Access controls are not bypassed. The scanner evaluates the submitted page URL only; it does not crawl every page on a site.
+Some public websites cannot be scanned automatically. They may block automated scanners, require a login or CAPTCHA, depend on browser features unavailable to this scanner, or be unreachable due to network, firewall, DNS, or certificate problems. Access controls and bot protection are not bypassed. The scanner evaluates the submitted page URL only; it does not crawl every page on a site.
 
 ## URL safety
 

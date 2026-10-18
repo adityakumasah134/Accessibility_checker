@@ -1,13 +1,16 @@
 import ipaddress
 import unittest
-from unittest.mock import patch
+from types import SimpleNamespace
+from unittest.mock import Mock, patch
 from urllib.parse import quote
 
 from app import (
     AXE_SCRIPT,
     ScanError,
     URLValidationError,
+    _guard_browser_request,
     _playwright_error_message,
+    _validate_host,
     app,
     scan_website,
     validate_public_url,
@@ -19,6 +22,10 @@ def dns_record(address):
 
 
 class PublicURLValidationTests(unittest.TestCase):
+    def setUp(self):
+        _validate_host.cache_clear()
+        self.addCleanup(_validate_host.cache_clear)
+
     def test_normalizes_public_url(self):
         with patch("app.socket.getaddrinfo", return_value=[dns_record("93.184.216.34")]):
             self.assertEqual(
@@ -46,6 +53,58 @@ class PublicURLValidationTests(unittest.TestCase):
             with self.assertRaisesRegex(URLValidationError, "standard HTTP"):
                 validate_public_url("https://example.com:80")
 
+    def test_caches_hostname_validation_across_http_and_https(self):
+        _validate_host.cache_clear()
+        self.addCleanup(_validate_host.cache_clear)
+        hostname = "cache-once.example"
+        with patch(
+            "app.socket.getaddrinfo",
+            return_value=[dns_record("93.184.216.34")],
+        ) as getaddrinfo:
+            validate_public_url(f"http://{hostname}")
+            validate_public_url(f"https://{hostname}")
+
+        getaddrinfo.assert_called_once()
+
+
+class BrowserRequestGuardTests(unittest.TestCase):
+    def test_allows_data_blob_and_about_requests(self):
+        for url in (
+            "data:text/html,<html></html>",
+            "blob:https://example.com/resource-id",
+            "about:blank",
+        ):
+            with self.subTest(url=url):
+                route = SimpleNamespace(
+                    request=SimpleNamespace(url=url, resource_type="document"),
+                    continue_=Mock(),
+                    abort=Mock(),
+                )
+                with patch("app.validate_public_url") as validate:
+                    _guard_browser_request(route)
+
+                route.continue_.assert_called_once_with()
+                route.abort.assert_not_called()
+                validate.assert_not_called()
+
+    def test_aborts_image_media_and_font_requests(self):
+        for resource_type in ("image", "media", "font"):
+            with self.subTest(resource_type=resource_type):
+                route = SimpleNamespace(
+                    request=SimpleNamespace(
+                        url="https://assets.example/resource",
+                        resource_type=resource_type,
+                    ),
+                    continue_=Mock(),
+                    abort=Mock(),
+                )
+                with patch("app.validate_public_url") as validate:
+                    _guard_browser_request(route)
+
+                route.abort.assert_called_once_with()
+                route.continue_.assert_not_called()
+                validate.assert_not_called()
+
 
 class BrowserErrorGuidanceTests(unittest.TestCase):
     def test_explains_browser_connection_timeout(self):
@@ -55,6 +114,13 @@ class BrowserErrorGuidanceTests(unittest.TestCase):
 
         self.assertIn("did not respond", message)
         self.assertIn("automated browsers", message)
+        self.assertIn("automated scanners", message)
+
+    def test_explains_sites_may_block_automated_scanners(self):
+        message = _playwright_error_message(RuntimeError("unexpected browser error"))
+
+        self.assertIn("block automated scanners", message)
+        self.assertIn("CAPTCHA", message)
 
     def test_explains_hostname_resolution_failure(self):
         message = _playwright_error_message(

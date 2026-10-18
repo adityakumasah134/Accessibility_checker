@@ -210,7 +210,7 @@ function setLoading(isLoading) {
   scanButton.querySelector(".button-label").textContent = isLoading ? "Scanning…" : "Scan website";
   progress.hidden = !isLoading;
   if (isLoading) {
-    progressMessage.textContent = "Loading website…";
+    progressMessage.textContent = "Scanning, this can take up to a minute.";
     formError.hidden = true;
     formError.textContent = "";
   }
