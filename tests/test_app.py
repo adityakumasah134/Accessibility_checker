@@ -1,4 +1,5 @@
 import ipaddress
+import socket
 import unittest
 from types import SimpleNamespace
 from unittest.mock import Mock, patch
@@ -64,7 +65,11 @@ class PublicURLValidationTests(unittest.TestCase):
             validate_public_url(f"http://{hostname}")
             validate_public_url(f"https://{hostname}")
 
-        getaddrinfo.assert_called_once()
+        getaddrinfo.assert_called_once_with(
+            hostname,
+            None,
+            type=socket.SOCK_STREAM,
+        )
 
 
 class BrowserRequestGuardTests(unittest.TestCase):

@@ -116,6 +116,7 @@ def _validate_host(hostname: str) -> str:
     try:
         addresses = socket.getaddrinfo(
             ascii_host,
+            None,
             type=socket.SOCK_STREAM,
         )
     except socket.gaierror as error:
