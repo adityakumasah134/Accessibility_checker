@@ -48,19 +48,13 @@ Run these commands from the folder containing `app.py`.
    python -m playwright install chromium
    ```
 
-5. Install axe-core:
-
-   ```powershell
-   npm install
-   ```
-
-6. Start the application:
+5. Start the application:
 
    ```powershell
    python app.py
    ```
 
-7. Open **http://127.0.0.1:5000** in your browser and submit a public website URL, such as `https://www.example.com`.
+6. Open **http://127.0.0.1:5000** in your browser and submit a public website URL, such as `https://www.example.com`.
 
 The app listens only on the local computer. Stop it with **Ctrl+C** in the terminal.
 
@@ -72,6 +66,12 @@ With the virtual environment active, run:
 python -m unittest discover -s tests -v
 ```
 
+## Deploy on Vercel
+
+Import `adityakumasah134/Accessibility_checker` from the Vercel dashboard, leave the root directory and build settings at their defaults, and deploy. Vercel detects the Flask app and runs it as a Python Function.
+
+The scanner requires Playwright's Chromium executable at runtime. Vercel does not install that browser just because the Python Playwright package is installed, so verify a real scan after deployment. If the deployed function reports that Chromium cannot start, the app needs a separately configured serverless Chromium runtime or a browser service before hosted scanning will work. Do not present a deployment as scan-ready until a live scan succeeds. axe-core 4.14.0 is bundled in `static/vendor/` under its Mozilla Public License 2.0; deployment does not depend on `node_modules`.
+
 ## Install and run (macOS / Linux)
 
 From the project folder:
@@ -81,7 +81,6 @@ python3 -m venv .venv
 source .venv/bin/activate
 python -m pip install -r requirements.txt
 python -m playwright install chromium
-npm install
 python app.py
 ```
 
@@ -118,8 +117,7 @@ templates/index.html    Dashboard markup
 static/css/style.css    Responsive dashboard styles
 static/js/app.js        Scan form and live report rendering
 static/favicon.svg      Dashboard favicon
+static/vendor/          axe-core browser script and license
 tests/test_app.py       URL-safety and scan-endpoint tests
 requirements.txt        Python dependencies
-package.json            axe-core dependency
-package-lock.json       Locked npm dependency versions
 ```

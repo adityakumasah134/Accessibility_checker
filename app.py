@@ -8,7 +8,7 @@ from flask import Flask, jsonify, render_template, request
 
 
 BASE_DIR = Path(__file__).resolve().parent
-AXE_SCRIPT = BASE_DIR / "node_modules" / "axe-core" / "axe.min.js"
+AXE_SCRIPT = BASE_DIR / "static" / "vendor" / "axe.min.js"
 BLOCKED_SUFFIXES = (
     ".localhost",
     ".local",
@@ -204,7 +204,7 @@ def _axe_violations(results: dict) -> list[dict]:
 def scan_website(url: str) -> dict:
     if not AXE_SCRIPT.is_file():
         raise ScanError(
-            "axe-core is not installed. Run `npm install` in the project folder, then try again."
+            "The bundled axe-core script is missing. Restore `static/vendor/axe.min.js` and try again."
         )
 
     from playwright.sync_api import Error as PlaywrightError

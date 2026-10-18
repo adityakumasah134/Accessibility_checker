@@ -1,9 +1,0 @@
-{
-  "name": "accessicheck",
-  "version": "1.0.0",
-  "private": true,
-  "description": "A Flask and Playwright website accessibility scanner powered by axe-core.",
-  "dependencies": {
-    "axe-core": "^4.10.3"
-  }
-}
