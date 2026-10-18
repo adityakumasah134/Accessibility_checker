@@ -1,0 +1,13 @@
+.git
+.venv
+venv
+node_modules
+.vercel
+__pycache__
+*.py[cod]
+.env
+.env.*
+!.env.example
+playwright-report
+test-results
+coverage

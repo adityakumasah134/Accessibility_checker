@@ -11,7 +11,6 @@ The dashboard includes an About section explaining the project's purpose and how
 ## Requirements
 
 - Python 3.10 or later
-- Node.js 18 or later (includes npm)
 - Internet access to install packages and scan public websites
 
 ## Install and run (Windows PowerShell)
@@ -66,18 +65,19 @@ With the virtual environment active, run:
 python -m unittest discover -s tests -v
 ```
 
-## Deploy on Vercel
+## Deploy from GitHub with Render
 
-Import `adityakumasah134/Accessibility_checker` from the Vercel dashboard, leave the root directory and build settings at their defaults, and deploy. Vercel detects the Flask app and runs it as a Python Function.
+Netlify can publish the dashboard's static files, but it does not run this Flask/Playwright server directly. The included Render Blueprint deploys the complete Flask app in Docker, including Chromium, so hosted scans do not require a separate Browserless account or API token.
 
-Vercel does not provide a local Chromium executable to the Python Function. Hosted scans therefore connect to Browserless using Playwright's CDP support:
+1. Push the project to your GitHub repository.
+2. Sign in to [Render](https://dashboard.render.com/) and choose **New → Blueprint**.
+3. Connect GitHub if prompted, then select `adityakumasah134/Accessibility_checker`.
+4. Review the `accessicheck` web service created from `render.yaml` and choose **Apply**.
+5. Wait for the Docker build and deployment to finish. Open the service's `onrender.com` URL and try a scan of a public page.
 
-1. Create a Browserless account and copy an API token from its dashboard.
-2. In Vercel, open the **accessicheck** project's **Settings → Environment Variables**.
-3. Add `BROWSERLESS_TOKEN` with your Browserless token for the **Production** environment (and **Preview** if needed). Keep the token private; do not commit it or paste it into source code.
-4. Redeploy the project. A live scan should be tested before treating the deployment as scan-ready.
+Render automatically deploys later commits to the connected branch. The Blueprint uses Render's free service plan, which can spin down while idle; the first request after inactivity may take longer. Chromium scans use additional memory and CPU, so upgrade the service plan if the free instance runs out of resources or scans time out. `Dockerfile` installs the Chromium browser required by Playwright, while `.dockerignore` keeps local environments, secrets, and build artifacts out of the image. axe-core 4.14.0 is bundled in `static/vendor/` under its Mozilla Public License 2.0.
 
-The Browserless service receives the pages being scanned. Local runs continue to use the Chromium installed by `python -m playwright install chromium`; if `BROWSERLESS_TOKEN` is set locally, the scanner uses Browserless instead. axe-core 4.14.0 is bundled in `static/vendor/` under its Mozilla Public License 2.0, so deployment does not depend on `node_modules`.
+The earlier Vercel deployment may remain online separately; it is not the recommended host for the full scanner because its Python Function does not include Chromium by default.
 
 ## Install and run (macOS / Linux)
 
@@ -127,4 +127,6 @@ static/favicon.svg      Dashboard favicon
 static/vendor/          axe-core browser script and license
 tests/test_app.py       URL-safety and scan-endpoint tests
 requirements.txt        Python dependencies
+Dockerfile              Flask runtime with Playwright Chromium for Render
+render.yaml             Render Blueprint for GitHub-connected deployment
 ```
