@@ -409,8 +409,26 @@ form.addEventListener("submit", async (event) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url: urlInput.value }),
     });
-    const body = await response.json();
-    if (!response.ok) throw new Error(body.error || "The scan could not be completed.");
+    const responseText = await response.text();
+    let body = null;
+    if (responseText) {
+      try {
+        body = JSON.parse(responseText);
+      } catch {
+        if (response.ok) {
+          throw new Error("The scan server returned an invalid response. Please try again.");
+        }
+      }
+    }
+    if (!response.ok) {
+      const message = typeof body?.error === "string"
+        ? body.error
+        : `The scan server returned HTTP ${response.status} without an error message. It may have timed out or restarted during the scan. Try again or scan a simpler public page.`;
+      throw new Error(message);
+    }
+    if (!body || typeof body !== "object") {
+      throw new Error("The scan server returned an empty response. Please try again.");
+    }
     renderReport(body);
   } catch (error) {
     showError(error instanceof Error ? error.message : "The scan could not be completed.");

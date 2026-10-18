@@ -100,7 +100,7 @@ Then open **http://127.0.0.1:5000**.
 3. The locally installed axe-core script runs against the rendered page.
 4. The browser returns axe-core's violations, passing checks, and incomplete checks to the dashboard.
 
-The browser waits for the initial document and gives pages additional time to finish loading before it runs axe-core. Playwright loads the local axe-core script at document initialization, so pages with restrictive script-tag policies can still be inspected without adding a remote script to the site. If navigation fails, the dashboard reports likely causes such as a timeout, DNS issue, certificate problem, or refused connection.
+The browser waits for the document to become ready, stops waiting for background page loads, and then runs axe-core. This keeps busy pages from holding the scan open unnecessarily; sites that do not become ready within the scan timeout may still be unavailable to the automated browser. Playwright loads the local axe-core script at document initialization, so pages with restrictive script-tag policies can still be inspected without adding a remote script to the site. If navigation fails, the dashboard reports likely causes such as a timeout, DNS issue, certificate problem, or refused connection.
 
 The page's violation descriptions, affected selectors, HTML snippets, help links, and remediation messages come from axe-core's scan output. Automated checks cannot identify every accessibility barrier; keyboard, screen-reader, and user testing remain important.
 

@@ -254,8 +254,8 @@ def scan_website(url: str) -> dict:
                 context.add_init_script(path=str(AXE_SCRIPT))
                 context.route("**/*", guard_request)
                 page = context.new_page()
-                page.set_default_navigation_timeout(45_000)
-                page.set_default_timeout(30_000)
+                page.set_default_navigation_timeout(25_000)
+                page.set_default_timeout(20_000)
 
                 response = page.goto(url, wait_until="commit")
                 if response is None:
@@ -264,22 +264,14 @@ def scan_website(url: str) -> dict:
                     raise ScanError(f"The website returned HTTP {response.status}.")
 
                 try:
-                    page.wait_for_load_state("domcontentloaded", timeout=15_000)
+                    page.wait_for_load_state("domcontentloaded", timeout=10_000)
                 except PlaywrightTimeoutError as error:
                     raise ScanError(
-                        "The website responded, but its initial page did not finish loading. "
-                        "It may be slow or may require browser features this scanner cannot provide."
+                        "The website responded, but its page did not become ready to scan "
+                        "within 10 seconds. It may be slow or may block automated browsers."
                     ) from error
 
-                try:
-                    page.wait_for_load_state("load", timeout=8_000)
-                except PlaywrightTimeoutError:
-                    app.logger.debug("Scanning after the page load event timed out.")
-
-                try:
-                    page.wait_for_load_state("networkidle", timeout=3_000)
-                except PlaywrightTimeoutError:
-                    app.logger.debug("Continuing the scan while the page still has network activity.")
+                page.evaluate("window.stop()")
 
                 axe_results = page.evaluate(
                     """async () => {
