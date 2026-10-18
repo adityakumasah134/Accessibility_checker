@@ -1,8 +1,9 @@
 import ipaddress
+import os
 import re
 import socket
 from pathlib import Path
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import quote, urlsplit, urlunsplit
 
 from flask import Flask, jsonify, render_template, request
 
@@ -207,6 +208,13 @@ def scan_website(url: str) -> dict:
             "The bundled axe-core script is missing. Restore `static/vendor/axe.min.js` and try again."
         )
 
+    browserless_token = os.environ.get("BROWSERLESS_TOKEN")
+    if os.environ.get("VERCEL") and not browserless_token:
+        raise ScanError(
+            "Hosted scanning is not configured. Add a Browserless API token as "
+            "`BROWSERLESS_TOKEN` in the Vercel project settings, then redeploy."
+        )
+
     from playwright.sync_api import Error as PlaywrightError
     from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
     from playwright.sync_api import sync_playwright
@@ -223,7 +231,20 @@ def scan_website(url: str) -> dict:
 
     try:
         with sync_playwright() as playwright:
-            browser = playwright.chromium.launch(headless=True)
+            if browserless_token:
+                endpoint = (
+                    "wss://production-sfo.browserless.io?token="
+                    f"{quote(browserless_token, safe='')}"
+                )
+                try:
+                    browser = playwright.chromium.connect_over_cdp(endpoint)
+                except PlaywrightError as error:
+                    raise ScanError(
+                        "Could not connect to Browserless. Check the "
+                        "`BROWSERLESS_TOKEN` value in the deployment settings."
+                    ) from error
+            else:
+                browser = playwright.chromium.launch(headless=True)
             try:
                 context = browser.new_context(
                     accept_downloads=False,

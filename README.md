@@ -70,7 +70,14 @@ python -m unittest discover -s tests -v
 
 Import `adityakumasah134/Accessibility_checker` from the Vercel dashboard, leave the root directory and build settings at their defaults, and deploy. Vercel detects the Flask app and runs it as a Python Function.
 
-The scanner requires Playwright's Chromium executable at runtime. Vercel does not install that browser just because the Python Playwright package is installed, so verify a real scan after deployment. If the deployed function reports that Chromium cannot start, the app needs a separately configured serverless Chromium runtime or a browser service before hosted scanning will work. Do not present a deployment as scan-ready until a live scan succeeds. axe-core 4.14.0 is bundled in `static/vendor/` under its Mozilla Public License 2.0; deployment does not depend on `node_modules`.
+Vercel does not provide a local Chromium executable to the Python Function. Hosted scans therefore connect to Browserless using Playwright's CDP support:
+
+1. Create a Browserless account and copy an API token from its dashboard.
+2. In Vercel, open the **accessicheck** project's **Settings → Environment Variables**.
+3. Add `BROWSERLESS_TOKEN` with your Browserless token for the **Production** environment (and **Preview** if needed). Keep the token private; do not commit it or paste it into source code.
+4. Redeploy the project. A live scan should be tested before treating the deployment as scan-ready.
+
+The Browserless service receives the pages being scanned. Local runs continue to use the Chromium installed by `python -m playwright install chromium`; if `BROWSERLESS_TOKEN` is set locally, the scanner uses Browserless instead. axe-core 4.14.0 is bundled in `static/vendor/` under its Mozilla Public License 2.0, so deployment does not depend on `node_modules`.
 
 ## Install and run (macOS / Linux)
 

@@ -9,6 +9,7 @@ from app import (
     URLValidationError,
     _playwright_error_message,
     app,
+    scan_website,
     validate_public_url,
 )
 
@@ -139,6 +140,13 @@ class ScanEndpointTests(unittest.TestCase):
 
         self.assertEqual(response.status_code, 502)
         self.assertIn("did not respond", response.get_json()["error"])
+
+
+class HostedBrowserConfigurationTests(unittest.TestCase):
+    def test_requires_browserless_token_on_vercel(self):
+        with patch.dict("os.environ", {"VERCEL": "1"}, clear=True):
+            with self.assertRaisesRegex(ScanError, "BROWSERLESS_TOKEN"):
+                scan_website("https://example.com")
 
 
 if __name__ == "__main__":
