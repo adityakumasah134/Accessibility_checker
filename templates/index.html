@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f6f8fb">
+    <meta
+      name="description"
+      content="Scan public websites for accessibility issues with axe-core."
+    >
+    <title>AccessiCheck — Website accessibility scanner</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap"
+      rel="stylesheet"
+    >
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="{{ url_for('static', filename='js/app.js') }}" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Main navigation">
+        <a class="brand" href="/" aria-label="AccessiCheck home">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none">
+              <path d="M16 3.5 27 8v7.5c0 6.7-4.7 11.2-11 13-6.3-1.8-11-6.3-11-13V8l11-4.5Z" stroke="currentColor" stroke-width="2"/>
+              <path d="m10.5 16 3.5 3.5 7.5-8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="brand-name">accessi<span>check</span></span>
+        </a>
+
+        <div class="nav-caption">WORKSPACE</div>
+        <nav class="navigation">
+          <a class="nav-link nav-link-active" href="#scanner" aria-current="page">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+            <span>Website scanner</span>
+          </a>
+          <a class="nav-link" href="#results">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19V9m7 10V5m7 14v-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span>Scan results</span>
+          </a>
+          <a class="nav-link" href="#about">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M12 11v5m0-8h.01" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <span>About</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-note">
+          <span class="note-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3 3.8 7v5.8c0 4.5 3.3 7.6 8.2 9.2 4.9-1.6 8.2-4.7 8.2-9.2V7L12 3Z" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="m9 12 2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <strong>Privacy by design</strong>
+          <p>Only public websites are scanned. Local and private network addresses are blocked.</p>
+        </div>
+        <div class="sidebar-footer"><span class="status-dot"></span> Accessibility toolkit</div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="breadcrumb"><span class="breadcrumb-divider">AC / 01</span><strong>ACCESSIBILITY CHECKER</strong></div>
+          <div class="topbar-label"><span class="topbar-sparkle" aria-hidden="true">✦</span> REAL-TIME · AXE-CORE</div>
+        </header>
+
+        <section class="page-intro" id="scanner">
+          <div class="hero-top">
+            <div class="hero-copy">
+              <div class="eyebrow"><span class="eyebrow-line"></span> ROUND 00 — WEB ACCESSIBILITY AUDIT</div>
+              <h1><span class="headline-line"><span>ACCESSIBILITY</span></span><span class="headline-line"><span>FOR <span class="headline-accent">EVERYONE.</span></span></span></h1>
+              <p class="intro-copy">The web should work for all of us. Scan a public website, find the barriers, and get a clear route to a more inclusive experience.</p>
+            </div>
+            <div class="access-visual" id="access-visual" aria-hidden="true">
+              <div class="visual-glow"></div>
+              <div class="visual-orbit visual-orbit-outer"></div>
+              <div class="visual-orbit visual-orbit-inner"></div>
+              <div class="visual-satellite satellite-one"></div>
+              <div class="visual-satellite satellite-two"></div>
+              <div class="visual-core">
+                <div class="visual-shield">
+                  <svg viewBox="0 0 64 64" fill="none">
+                    <path d="M32 6 53 14v14c0 13-8.4 22.8-21 29C19.4 50.8 11 41 11 28V14l21-8Z" fill="url(#shield-fill)" stroke="rgba(255,255,255,.72)" stroke-width="1.5"/>
+                    <path d="m22 32 7 7 14-16" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <defs><linearGradient id="shield-fill" x1="13" y1="9" x2="52" y2="57" gradientUnits="userSpaceOnUse"><stop stop-color="#85A4FF"/><stop offset="1" stop-color="#4462D2"/></linearGradient></defs>
+                  </svg>
+                </div>
+                <span class="core-caption">ACCESS FOR ALL</span>
+              </div>
+              <div class="visual-float-card visual-card-top">
+                <span class="visual-card-icon visual-icon-purple">✦</span>
+                <span><strong>axe-core</strong><small>Accessibility engine</small></span>
+                <i class="visual-live-dot"></i>
+              </div>
+              <div class="visual-float-card visual-card-bottom">
+                <span class="visual-card-icon visual-icon-green">✓</span>
+                <span><strong>Inclusive by design</strong><small>One scan at a time</small></span>
+              </div>
+              <span class="visual-sparkle sparkle-one">✦</span>
+              <span class="visual-sparkle sparkle-two">✧</span>
+            </div>
+          </div>
+
+          <form class="scan-form" id="scan-form">
+            <label class="url-label" for="website-url">WEBSITE URL</label>
+            <div class="url-input-row">
+              <span class="url-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M3.5 12h17M12 3c2.2 2.4 3.3 5.4 3.3 9S14.2 18.6 12 21c-2.2-2.4-3.3-5.4-3.3-9S9.8 5.4 12 3Z" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+              </span>
+              <input
+                id="website-url"
+                name="url"
+                type="url"
+                placeholder="https://example.com"
+                autocomplete="url"
+                inputmode="url"
+                maxlength="2048"
+                required
+                aria-describedby="url-hint form-error"
+              >
+              <button class="scan-button" id="scan-button" type="submit">
+                <span class="button-label">Scan website</span>
+                <svg class="button-arrow" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span class="button-spinner" aria-hidden="true"></span>
+              </button>
+            </div>
+            <div class="form-meta">
+              <span id="url-hint">Scan public pages; some sites block automated browsers.</span>
+              <span class="secure-label"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="7" width="10" height="7" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg> Secure scan</span>
+            </div>
+            <p class="form-error" id="form-error" role="alert" hidden></p>
+          </form>
+          <div class="scan-progress" id="scan-progress" role="status" aria-live="polite" hidden>
+            <span class="progress-spinner" aria-hidden="true"></span>
+            <span id="progress-message">Loading website…</span>
+            <span class="progress-note">Large pages can take about a minute</span>
+          </div>
+        </section>
+
+        <section class="results-section" id="results" aria-labelledby="results-heading">
+          <div class="section-heading">
+            <div>
+              <div class="eyebrow results-eyebrow">SCAN RESULTS</div>
+              <h2 id="results-heading">Accessibility overview</h2>
+              <p class="results-intro">We explain each finding in everyday words. A screen reader is a tool that reads a page aloud for people who are blind or have low vision.</p>
+            </div>
+            <div class="scan-site" id="scan-site" hidden>
+              <span class="site-indicator"></span>
+              <span id="scanned-url"></span>
+            </div>
+          </div>
+
+          <div class="summary-grid" aria-label="Scan summary">
+            <article class="summary-card total-card">
+              <div class="summary-card-top"><span>Issues to fix</span><span class="metric-icon metric-icon-blue" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M10 3.3 18 17H2L10 3.3Z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M10 7.5v4.2m0 2.5h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span></div>
+              <strong class="metric-value" id="metric-total">—</strong>
+              <span class="metric-caption">Things that may make the site harder to use</span>
+            </article>
+            <article class="summary-card">
+              <div class="summary-card-top"><span>Fix these first</span><span class="metric-icon metric-icon-red" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="M10 3.2 17 6v4.8c0 4-2.9 6.8-7 8-4.1-1.2-7-4-7-8V6l7-2.8Z" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 7v4m0 2.3h.01" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></span></div>
+              <strong class="metric-value" id="metric-priority">—</strong>
+              <span class="metric-caption">The most important problems</span>
+            </article>
+            <article class="summary-card">
+              <div class="summary-card-top"><span>Checks passed</span><span class="metric-icon metric-icon-green" aria-hidden="true"><svg viewBox="0 0 20 20"><path d="m4 10.5 4 4L16.5 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span></div>
+              <strong class="metric-value" id="metric-passes">—</strong>
+              <span class="metric-caption">Things the site is doing well</span>
+            </article>
+            <article class="summary-card">
+              <div class="summary-card-top"><span>Needs a person to check</span><span class="metric-icon metric-icon-amber" aria-hidden="true"><svg viewBox="0 0 20 20"><circle cx="10" cy="10" r="7" fill="none" stroke="currentColor" stroke-width="1.5"/><path d="M10 6.5v4m0 2.5h.01" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg></span></div>
+              <strong class="metric-value" id="metric-incomplete">—</strong>
+              <span class="metric-caption">A person should confirm these</span>
+            </article>
+          </div>
+
+          <div class="violations-panel">
+            <div class="violations-toolbar">
+              <div class="violations-title">
+                <h3>What could be better</h3>
+                <span class="issue-count" id="issue-count">Awaiting scan</span>
+              </div>
+              <label class="filter-control">
+                <span class="sr-only">Filter results by how important they are</span>
+                <select id="severity-filter" disabled>
+                  <option value="all">All issues</option>
+                  <option value="critical">Fix first</option>
+                  <option value="serious">High priority</option>
+                  <option value="moderate">Worth fixing</option>
+                  <option value="minor">Small improvement</option>
+                </select>
+                <svg viewBox="0 0 16 16" aria-hidden="true"><path d="m4 6 4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </label>
+            </div>
+            <div class="issue-list" id="issue-list" aria-live="polite">
+              <div class="empty-state" id="empty-state">
+                <span class="empty-illustration" aria-hidden="true">
+                  <svg viewBox="0 0 64 64" fill="none"><rect x="12" y="9" width="40" height="46" rx="6" fill="#F2F6FC" stroke="#DCE5F1" stroke-width="1.5"/><path d="M22 22h20M22 30h14M22 38h10" stroke="#9EADC1" stroke-width="2" stroke-linecap="round"/><circle cx="46" cy="45" r="10" fill="#E8F7F2" stroke="#A9DFCE" stroke-width="1.5"/><path d="m41.5 45 3 3 5-6" stroke="#208C70" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <h4 id="empty-title">Your report will appear here</h4>
+                <p id="empty-description">Enter a public website URL above to check for accessibility barriers.</p>
+              </div>
+            </div>
+          </div>
+          <p class="report-footnote">Automated checks are a helpful starting point, not a substitute for testing with assistive technology and people with disabilities.</p>
+        </section>
+
+        <section class="about-section" id="about" aria-labelledby="about-heading">
+          <div class="about-intro about-reveal">
+            <div class="eyebrow"><span class="eyebrow-line"></span> ABOUT ACCESSICHECK</div>
+            <div class="about-intro-grid">
+              <h2 id="about-heading">A more inclusive web starts with <span>seeing what gets in the way.</span></h2>
+              <div class="about-summary">
+                <p>AccessiCheck helps make accessibility easier to understand. It checks a publicly reachable page with Playwright and axe-core, then turns scan findings into clear explanations and practical next steps.</p>
+                <a class="about-cta" href="#scanner">
+                  <span>Try a website scan</span>
+                  <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <div class="about-showcase about-reveal" aria-hidden="true">
+            <div class="about-showcase-orbit about-orbit-one"></div>
+            <div class="about-showcase-orbit about-orbit-two"></div>
+            <div class="about-showcase-glow"></div>
+            <div class="about-showcase-mark">
+              <svg viewBox="0 0 64 64" fill="none">
+                <path d="M32 6 53 14v14c0 13-8.4 22.8-21 29C19.4 50.8 11 41 11 28V14l21-8Z" fill="url(#about-shield-fill)" stroke="rgba(255,255,255,.72)" stroke-width="1.5"/>
+                <path d="m22 32 7 7 14-16" stroke="white" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                <defs><linearGradient id="about-shield-fill" x1="13" y1="9" x2="52" y2="57" gradientUnits="userSpaceOnUse"><stop stop-color="#ffb06a"/><stop offset="1" stop-color="#f04b1c"/></linearGradient></defs>
+              </svg>
+            </div>
+            <div class="about-showcase-copy">
+              <span>THE PURPOSE</span>
+              <p>Better access isn't an extra.<br><strong>It's part of the experience.</strong></p>
+            </div>
+            <span class="about-showcase-index">ACCESS FOR ALL · 01</span>
+          </div>
+
+          <div class="about-pillars" aria-label="How AccessiCheck helps">
+            <article class="about-pillar about-reveal">
+              <span class="about-pillar-index">01 / FIND</span>
+              <h3>Notice barriers</h3>
+              <p>Run automated checks on a page that is publicly available to the scanner.</p>
+            </article>
+            <article class="about-pillar about-reveal">
+              <span class="about-pillar-index">02 / UNDERSTAND</span>
+              <h3>Make sense of results</h3>
+              <p>Read plain-language explanations instead of starting with technical jargon.</p>
+            </article>
+            <article class="about-pillar about-reveal">
+              <span class="about-pillar-index">03 / IMPROVE</span>
+              <h3>Take a next step</h3>
+              <p>Use suggested fixes as a starting point for making the experience more inclusive.</p>
+            </article>
+          </div>
+
+          <p class="about-caveat about-reveal">Automated scans are a starting point, not a complete accessibility audit. Some barriers still need human review and testing with assistive technology.</p>
+
+        </section>
+
+        <footer class="team-signoff about-reveal" aria-label="Website credits">
+          <div class="team-signoff-stage" id="team-signoff-stage">
+            <div class="team-signoff-orbit team-signoff-orbit-one" aria-hidden="true"></div>
+            <div class="team-signoff-orbit team-signoff-orbit-two" aria-hidden="true"></div>
+            <div class="team-signoff-object" aria-hidden="true">
+              <div class="team-signoff-card">
+                <span class="team-signoff-mark">
+                  <svg viewBox="0 0 36 36" fill="none">
+                    <path d="m18 3 4.2 10.8L33 18l-10.8 4.2L18 33l-4.2-10.8L3 18l10.8-4.2L18 3Z" fill="currentColor"/>
+                    <circle cx="18" cy="18" r="3" fill="#211711"/>
+                  </svg>
+                </span>
+                <span class="team-signoff-overline">ACCESSICHECK · 01</span>
+                <span class="team-signoff-card-title">TEAM<br><strong>GALAXY</strong></span>
+                <span class="team-signoff-card-rule"></span>
+                <span class="team-signoff-card-caption">ACCESS FOR ALL</span>
+              </div>
+            </div>
+            <div class="team-signoff-copy">
+              <span class="team-signoff-kicker">BUILT WITH PURPOSE</span>
+              <p>Made by <strong>Team Galaxy</strong></p>
+              <span class="team-signoff-note">A little more access. For everyone.</span>
+            </div>
+          </div>
+        </footer>
+      </main>
+    </div>
+  </body>
+</html>
